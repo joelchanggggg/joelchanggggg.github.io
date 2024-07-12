@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orangutan Jump Game</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        } 
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place behind other content */
+            overflow: hidden;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .nav-bar {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .nav-bar img {
+            width: 100%;
+            height: auto;
+        }
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            background-color: rgba(2, 75, 19, 0.9);
+            border: 4px solid #0c6921;
+            overflow: hidden;
+            border-radius: 15px;
+            margin-top: 190px; /* Adjust top margin to create space from navbar */
+        }
+
+        .message {
+            position: absolute;
+            top: 20px; 
+            right: 20px; 
+            font-size: 30px; 
+            color: #f3bc07; 
+            white-space: nowrap;
+        }
+
+        .orangutan {
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            width: 150px; 
+            height: auto;
+            transition: bottom 0.2s;
+        }
+
+        .banana {
+            position: absolute;
+            bottom: 4px; 
+            right: 0; 
+            width: 60px;
+            height: 120px; 
+            transform: translateX(-100%); 
+            animation: move 3s linear forwards; 
+            background-image: url('FINALBANANA.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        @keyframes move {
+            0% {
+                transform: translateX(100%); 
+            }
+            100% {
+                transform: translateX(-2000%); 
+            }
+        }
+
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: red;
+        }
+
+        .score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            color: #f3bc07;
+        }
+        .high-score {
+            position: absolute;
+            top: 55px;
+            right: 597px;
+            font-size: 28px;
+            color: #f3bc07;
+        }
+
+        .start-btn {
+            display: inline-block;
+            padding: 20px 40px; /* Increased padding */
+            background-color: #f3bc07;
+            color: #123308;
+            border: 4px solid #0c6921;
+            border-radius: 10px; /* Increased border radius */
+            cursor: pointer;
+            margin-top: 18px;
+            font-size: 24px; /* Increased font size */
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            z-index: 2; /* Place above the video */
+            position: absolute;
+            right: 742px; /* Adjust this value to move further right */
+            top: 600px;
+        }
+
+        .start-btn:hover {
+            background-color: #004d40;
+            color: #fbd600;
+        }
+
+        .back-to-404-btn {
+            display: inline-block;
+            padding: 20px 40px; /* Adjust padding as needed */
+            background-color: #f3bc07;
+            color: #123308;
+            border: 4px solid #0c6921;
+            border-radius: 10px; /* Rounded corners */
+            cursor: pointer;
+            font-size: 24px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            position: absolute;
+            right: 462px; /* Adjust position */
+            top: 618px; /* Adjust position */
+            z-index: 2; /* Ensure it's above other content */
+        }
+
+        .back-to-404-btn:hover {
+            background-color: #004d40;
+            color: #fbd600;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            z-index: 1000; /* Ensure it's above other content */
+        }
+       
+    </style>
+</head>
+<body>
+   
+    <div class="nav-bar">
+        <img src="NavBar.png" alt="Navigation Bar">
+    </div>
+
+    <div class="video-background">
+        <video autoplay muted loop>
+            <source src="216134_small.mp4" type="video/mp4"> 
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div class="game-container" id="gameContainer">
+        <div class="message">Press space to Jump!</div>
+        <img src="ORANGUTAN2D.png" id="orangutan" class="orangutan">
+        <div class="game-over" id="gameOver">Game Over!</div>
+        <div class="score" id="score">Score: 0</div>
+        <div class="high-score" id="highScore">High Score: 0</div>
+    </div>
+    <button class="start-btn" id="startBtn">Start Game</button>
+    <button class="back-to-404-btn" onclick="window.location.href='INTDES-ASSGT2.html';">Back to 404 Page</button>
+    <div class="bottom-section">
+    </div>
+
+    <audio id="jumpSound">
+        <source src="boing-101318.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const gameOverText = document.getElementById('gameOver');
+        const startBtn = document.getElementById('startBtn');
+        const orangutan = document.getElementById('orangutan');
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('highScore');
+    
+        let isJumping = false;
+        let isGameOver = false;
+        let score = 0;
+        let highestScore = localStorage.getItem('highestScore') || 0;
+        let spacePressed = false; // Track if space bar is pressed
+    
+        highScoreDisplay.textContent = `High Score: ${highestScore}`;
+    
+        function jump() {
+            if (!isJumping && !spacePressed) { 
+                isJumping = true;
+                spacePressed = true; 
+                jumpSound.currentTime = 0; 
+                jumpSound.play(); 
+
+                let jumpHeight = 0;
+                let upInterval = setInterval(() => {
+                    if (jumpHeight >= 250) {
+                        clearInterval(upInterval);
+                        let downInterval = setInterval(() => {
+                            if (jumpHeight <= 0) {
+                                clearInterval(downInterval);
+                                isJumping = false;
+                            } else {
+                                jumpHeight -= 10;
+                                orangutan.style.bottom = jumpHeight + 'px';
+                            }
+                        }, 20);
+                    } else {
+                        jumpHeight += 10;
+                        orangutan.style.bottom = jumpHeight + 'px';
+                    }
+                }, 20);
+            }
+        }
+    
+        function resetSpacePress() {
+            spacePressed = false; // Reset space bar press status
+        }
+    
+        function createObstacle() {
+            const isDouble = Math.random() < 0.3; // 30% chance for double bananas
+            const banana1 = document.createElement('div');
+            banana1.classList.add('banana');
+            banana1.style.right = '0'; // Adjust this value for initial position of first banana
+            gameContainer.appendChild(banana1);
+    
+            if (isDouble) {
+                const banana2 = document.createElement('div');
+                banana2.classList.add('banana');
+                banana2.style.right = '40px'; // Adjust this value to position second banana next to the first one
+                gameContainer.appendChild(banana2);
+            }
+    
+            let obstacleInterval = setInterval(() => {
+                if (isGameOver) {
+                    clearInterval(obstacleInterval);
+                } else {
+                    const bananas = document.querySelectorAll('.banana');
+                    bananas.forEach((banana) => {
+                        const bananaRect = banana.getBoundingClientRect();
+                        const orangutanRect = orangutan.getBoundingClientRect();
+                        const collisionMargin = 100; // Adjust this value to change the collision height
+    
+                        if (bananaRect.left < orangutanRect.right &&
+                            bananaRect.right > orangutanRect.left &&
+                            bananaRect.bottom - collisionMargin > orangutanRect.top &&
+                            bananaRect.top + collisionMargin < orangutanRect.bottom) {
+                            clearInterval(obstacleInterval);
+                            gameOver();
+                        } else if (bananaRect.right < orangutanRect.left && !banana.classList.contains('scored')) {
+                            // Orangutan has successfully jumped over the banana
+                            banana.classList.add('scored');
+                            score += isDouble ? 2 : 1; // Increase score by 2 for double bananas
+                            scoreDisplay.textContent = `Score: ${score}`;
+                        }
+                    });
+                }
+            }, 20);
+        }
+    
+        function gameOver() {
+            isGameOver = true;
+            gameOverText.style.display = 'block';
+            // Update highest score if current score is higher
+            if (score > highestScore) {
+                highestScore = score;
+                localStorage.setItem('highestScore', highestScore); // Store highest score in local storage
+                highScoreDisplay.textContent = `High Score: ${highestScore}`; // Update high score display
+            }
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+    
+        document.addEventListener('keydown', (event) => {
+            if ((event.code === 'Space' || event.key === ' ') && !isGameOver) {
+                jump();
+            }
+        });
+    
+        document.addEventListener('keyup', resetSpacePress); // Reset space press on key release
+    
+        startBtn.addEventListener('click', () => {
+            startBtn.style.display = 'none';
+            isGameOver = false;
+            gameOverText.style.display = 'none';
+            score = 0; // Reset score
+            scoreDisplay.textContent = `Score: ${score}`;
+            setInterval(createObstacle, 2000);
+        });
+    </script>    
+</body>
+</html>
